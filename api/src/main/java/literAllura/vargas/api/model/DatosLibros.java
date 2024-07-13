@@ -9,6 +9,6 @@ import java.util.List;
 public record DatosLibros(
         @JsonAlias("title") String titulo,
         @JsonAlias("languages") List<String> idioma,
-        @JsonAlias("download_count") Double numeroDeDescargas
+        @JsonAlias("download_count") Integer numeroDeDescargas  // Changed to Integer
 ) {
 }

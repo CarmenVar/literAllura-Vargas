@@ -16,10 +16,13 @@ public class Autor {
     @Column(nullable = false)
     private LocalDate fechaDeNacimiento;
 
-    @Column(nullable = false)
+    @Column(nullable = true) // Allow null for living authors
     private LocalDate fechaDeMuerte;
 
     public Autor(DatosAutor datosAutor) {
+        this.nombre = datosAutor.nombre();
+        this.fechaDeNacimiento = LocalDate.parse(datosAutor.fechaDeNacimiento());
+        this.fechaDeMuerte = LocalDate.parse(datosAutor.fechaDeMuerte());
     }
 
     // Getters y setters
@@ -55,6 +58,17 @@ public class Autor {
     public void setFechaDeMuerte(LocalDate fechaDeMuerte) {
         this.fechaDeMuerte = fechaDeMuerte;
     }
+
+    @Override
+    public String toString() {
+        return "Autor{" +
+                "id=" + id +
+                ", nombre='" + nombre + '\'' +
+                ", fechaDeNacimiento=" + fechaDeNacimiento +
+                ", fechaDeMuerte=" + fechaDeMuerte +
+                '}';
+    }
 }
+
 
 

@@ -4,15 +4,16 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "libros")
-
 public class Libro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long Id;
+    private long id;  // Changed to lowercase
+
     @Column(unique = true)
     private String titulo;
     private String idioma;
     private Double numeroDeDescargas;
+
     @ManyToOne
     @JoinColumn(name = "autor_id")
     private Autor autor;
@@ -21,19 +22,21 @@ public class Libro {
 
     public Libro(DatosLibros datosLibros) {
         this.titulo = datosLibros.titulo();
-        this.idioma = datosLibros.idioma().get(0);
-        this.numeroDeDescargas = datosLibros.numeroDeDescargas();
+        // Check if idiomas list is not empty
+        this.idioma = datosLibros.idioma().isEmpty() ? "Desconocido" : datosLibros.idioma().get(0);
+        this.numeroDeDescargas = Double.valueOf(datosLibros.numeroDeDescargas()); // Assuming this is already a Double
     }
 
     @Override
     public String toString() {
         return  "\n------------------LIBRO--------------------" +
                 "\nTitulo: " + titulo +
-                "\nAutor: " + autor.getNombre() +
+                "\nAutor: " + (autor != null ? autor.getNombre() : "Desconocido") +
                 "\nIdioma: " + idioma +
                 "\nNumero de descargas: " + numeroDeDescargas;
     }
 
+    // Getters and setters
     public String getTitulo() {
         return titulo;
     }
@@ -66,3 +69,5 @@ public class Libro {
         this.autor = autor;
     }
 }
+
+

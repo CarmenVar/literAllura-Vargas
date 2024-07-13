@@ -9,78 +9,69 @@ import literAllura.vargas.api.repository.ILibroRepository;
 import literAllura.vargas.api.service.ConsumoAPI;
 import literAllura.vargas.api.service.ConvierteDatos;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
 public class Principal {
     private static final String URL_BASE = "https://gutendex.com/books/?search=";
-    private ConsumoAPI consumoAPI = new ConsumoAPI();
-    private ConvierteDatos convierteDatos = new ConvierteDatos();
-    private Scanner teclado = new Scanner(System.in);
-    private ILibroRepository libroRepository;
-    private IAutorRepository autorRepository;
-    private List<Libro> libros;
-    private List<Autor> autores;
-    private List<String> idiomas;
+    private final ConsumoAPI consumoAPI = new ConsumoAPI();
+    private final ConvierteDatos convierteDatos = new ConvierteDatos();
+    private final Scanner teclado = new Scanner(System.in);
+    private final ILibroRepository libroRepository;
+    private final IAutorRepository autorRepository;
 
-
-    public Principal(ILibroRepository libroRepository, IAutorRepository autorRepository){
+    public Principal(ILibroRepository libroRepository, IAutorRepository autorRepository) {
         this.libroRepository = libroRepository;
         this.autorRepository = autorRepository;
     }
 
     public void muestraElMenu() {
-        int opcion = 1;
+        int opcion = -1;
         while (opcion != 0) {
-            var menu = """
-                    ---------------------------------------------
-                    1. Agregar libro
-                    2. Lista de libros registrados
-                    3. Lista de autores registrados
-                    4. Lista de autores vivos en un determinado año
-                    5. Lista libros por idioma
-                    0- Salir
-                    ---------------------------------------------
-                    Selecciona una opcion para continuar
-                    """;
-            System.out.println(menu);
+            System.out.println(getMenu());
             if (teclado.hasNextInt()) {
                 opcion = teclado.nextInt();
                 teclado.nextLine();
-
-                switch (opcion) {
-                    case 1:
-                        buscarLibro();
-                        break;
-                    case 2:
-                        listaLibrosRegistrados();
-                        break;
-                    case 3:
-                        listaAutorsRegistrados();
-                        break;
-                    case 4:
-                        listaAutoresVivos();
-                        break;
-                    case 5:
-                        listaLibrosPorIdioma();
-                        break;
-                    case 0:
-                        System.out.println("Cerrando la aplicacion");
-                        break;
-                    default:
-                        System.out.println("Opcion no valida");
-                }
+                manejarOpcion(opcion);
             } else {
                 System.out.println("Opción no válida");
                 teclado.next();
             }
         }
+        teclado.close();
     }
 
-    private void buscarLibro(){
+    private String getMenu() {
+        return """
+                ---------------------------------------------
+                1. Agregar libro
+                2. Lista de libros registrados
+                3. Lista de autores registrados
+                4. Lista de autores vivos en un determinado año
+                5. Lista libros por idioma
+                0- Salir
+                ---------------------------------------------
+                Selecciona una opcion para continuar
+                """;
+    }
+
+    private void manejarOpcion(int opcion) {
+        switch (opcion) {
+            case 1 -> buscarLibro();
+            case 2 -> listaLibrosRegistrados();
+            case 3 -> listaAutorsRegistrados();
+            case 4 -> listaAutoresVivos();
+            case 5 -> listaLibrosPorIdioma();
+            case 0 -> System.out.println("Cerrando la aplicación");
+            default -> System.out.println("Opción no válida");
+        }
+    }
+
+    private void buscarLibro() {
         System.out.println("Ingrese el nombre del libro que desea agregar:");
-        var tituloLibro = teclado.nextLine();
-        var json = consumoAPI.obtenerDatos(URL_BASE + tituloLibro.replace(" ", "+"));
+        String tituloLibro = teclado.nextLine();
+        String json = consumoAPI.obtenerDatos(URL_BASE + tituloLibro.replace(" ", "+"));
         guardarDatos(json);
     }
 
@@ -88,58 +79,57 @@ public class Principal {
         try {
             DatosAutor datosAutor = convierteDatos.obtenerDatos(json, DatosAutor.class);
             DatosLibros datosLibro = convierteDatos.obtenerDatos(json, DatosLibros.class);
-            //Verifica si el autor ya existe
+
             Autor autor = autorRepository.findByNombre(datosAutor.nombre())
                     .orElseGet(() -> autorRepository.save(new Autor(datosAutor)));
-            //Verifica si el libro ya existe
+
             if (libroRepository.findByTitulo(datosLibro.titulo()).isEmpty()) {
                 Libro libro = new Libro(datosLibro);
                 libro.setAutor(autor);
                 libroRepository.save(libro);
                 System.out.println(libro);
-                System.out.println("Libro agregado con exito");
-
-            }else {
-                System.out.printf("---------------------------------------------\n");
-                System.out.println("El libro ya se encuntra registrado");
+                System.out.println("Libro agregado con éxito");
+            } else {
+                System.out.println("El libro ya se encuentra registrado");
             }
-        }catch (NullPointerException e) {
-            System.out.printf("---------------------------------------------\n");
-            System.out.println("Libro no encontrado");
+        } catch (Exception e) {
+            System.out.println("Libro no encontrado: " + e.getMessage());
         }
     }
 
     private void listaLibrosRegistrados() {
-        libros = libroRepository.findAll();
-        libros.stream().forEach(System.out::println);
+        List<Libro> libros = libroRepository.findAll();
+        libros.forEach(System.out::println);
     }
 
     private void listaAutorsRegistrados() {
-        autores = autorRepository.findAll();
-        autores.stream().forEach(System.out::println);
+        List<Autor> autores = autorRepository.findAll();
+        autores.forEach(System.out::println);
     }
 
     private void listaAutoresVivos() {
-        System.out.println("Indica el año limite: ");
+        System.out.println("Indica el año límite: ");
         int fecha = teclado.nextInt();
-        autores = autorRepository.autoresPorFechaDeMuerte(fecha);
-        autores.stream().forEach(System.out::println);
+        List<Autor> autores = autorRepository.autoresPorFechaDeMuerte(LocalDate.ofEpochDay(fecha));
+        autores.forEach(System.out::println);
     }
 
     public void listaLibrosPorIdioma() {
-        idiomas = libroRepository.idiomasLibros();
-        System.out.printf("------------------IDIOMAS--------------------\n");
-        idiomas.stream().forEach(System.out::println);
-        System.out.printf("---------------------------------------------\n");
+        List<String> idiomas = libroRepository.idiomasLibros();
+        System.out.println("------------------IDIOMAS--------------------");
+        idiomas.forEach(System.out::println);
+        System.out.println("---------------------------------------------");
         System.out.println("Ingresa el idioma por el que deseas buscar: ");
-        var idiomaSeleccionado = teclado.nextLine().toLowerCase();
-        libros = libroRepository.librosPoridioma(idiomaSeleccionado);
+        String idiomaSeleccionado = teclado.nextLine().toLowerCase();
+        List<Libro> libros = libroRepository.librosPorIdioma(idiomaSeleccionado);
+
         if (libros.isEmpty()) {
-            System.out.println("Opcion no valida");
-        }else {
-            libros.stream().forEach(System.out::println);
+            System.out.println("Opción no válida");
+        } else {
+            libros.forEach(System.out::println);
         }
     }
 }
+
 
 

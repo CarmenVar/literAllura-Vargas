@@ -1,4 +1,5 @@
 package literAllura.vargas.api;
+
 import literAllura.vargas.api.model.principal.Principal;
 import literAllura.vargas.api.repository.IAutorRepository;
 import literAllura.vargas.api.repository.ILibroRepository;
@@ -20,9 +21,14 @@ public class ApiApplication implements CommandLineRunner {
 	}
 
 	@Override
-	public void run(String... args) throws Exception {
-		Principal principal = new Principal(libroRepository, autorRepository);
-		principal.muestraElMenu();
+	public void run(String... args) {
+		try {
+			Principal principal = new Principal(libroRepository, autorRepository);
+			principal.muestraElMenu();
+		} catch (Exception e) {
+			System.err.println("Error starting the application: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
-
 }
+

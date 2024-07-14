@@ -16,6 +16,11 @@ public class ApiApplication implements CommandLineRunner {
 	@Autowired
 	private IAutorRepository autorRepository;
 
+	public ApiApplication(ILibroRepository libroRepository, IAutorRepository autorRepository) {
+		this.libroRepository = libroRepository;
+		this.autorRepository = autorRepository;
+	}
+
 	public static void main(String[] args) {
 		SpringApplication.run(ApiApplication.class, args);
 	}

@@ -2,6 +2,7 @@ package literAllura.vargas.api.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 @Entity
 public class Autor {
@@ -22,9 +23,12 @@ public class Autor {
     public Autor(DatosAutor datosAutor) {
         this.nombre = datosAutor.nombre();
         this.fechaDeNacimiento = LocalDate.parse(datosAutor.fechaDeNacimiento());
-        this.fechaDeMuerte = LocalDate.parse(datosAutor.fechaDeMuerte());
+        try {
+            this.fechaDeMuerte = datosAutor.fechaDeMuerte() != null ? LocalDate.parse(datosAutor.fechaDeMuerte()) : null;
+        } catch (DateTimeParseException e) {
+            this.fechaDeMuerte = null;
+        }
     }
-
     // Getters y setters
 
     public Long getId() {
@@ -67,6 +71,13 @@ public class Autor {
                 ", fechaDeNacimiento=" + fechaDeNacimiento +
                 ", fechaDeMuerte=" + fechaDeMuerte +
                 '}';
+    }
+
+    public static Autor getPrimerAutor(DatosLibros datosLibros) {
+        if (datosLibros != null && datosLibros.idioma() != null && !datosLibros.idioma().isEmpty()) {
+
+        }
+        return null;
     }
 }
 

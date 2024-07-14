@@ -31,7 +31,7 @@ public class Principal {
         while (opcion != 0) {
             var menu = """
                     ---------------------------------------------
-                    1. Agregar libro
+                    1. Buscar libro
                     2. Lista de libros registrados
                     3. Lista de autores registrados
                     4. Lista de autores vivos en un determinado año
@@ -43,7 +43,7 @@ public class Principal {
             System.out.println(menu);
             if (teclado.hasNextInt()) {
                 opcion = teclado.nextInt();
-                teclado.nextLine();
+                teclado.nextLine(); // consume newline
 
                 switch (opcion) {
                     case 1:
@@ -53,7 +53,7 @@ public class Principal {
                         listaLibrosRegistrados();
                         break;
                     case 3:
-                        listaAutorsRegistrados();
+                        listaAutoresRegistrados();
                         break;
                     case 4:
                         listaAutoresVivos();
@@ -69,15 +69,15 @@ public class Principal {
                 }
             } else {
                 System.out.println("Opción no válida");
-                teclado.next();
+                teclado.next(); // consume the invalid input
             }
         }
     }
 
     private void buscarLibro() {
-        System.out.println("Ingrese el nombre del libro que desea agregar:");
+        System.out.println("Ingrese el nombre del libro que desea buscar:");
         var tituloLibro = teclado.nextLine();
-        var json = consumoAPI.obtenerDatos(URL_BASE + tituloLibro.replace(" ", "+"));
+        var json = consumoAPI.obtenerDatos(URL_BASE + tituloLibro);
         guardarDatos(json);
     }
 
@@ -119,7 +119,7 @@ public class Principal {
         libros.forEach(System.out::println);
     }
 
-    private void listaAutorsRegistrados() {
+    private void listaAutoresRegistrados() {
         autores = autorRepository.findAll();
         autores.forEach(System.out::println);
     }
@@ -138,7 +138,7 @@ public class Principal {
         System.out.println("------------------IDIOMAS--------------------");
         idiomas.forEach(System.out::println);
         System.out.println("---------------------------------------------");
-        System.out.println("Ingresa el idioma por el que deseas buscar: ");
+        System.out.println("Ingresa el idioma a buscar: ");
         var idiomaSeleccionado = teclado.nextLine().toLowerCase();
         libros = libroRepository.librosPorIdioma(idiomaSeleccionado);
         if (libros.isEmpty()) {
@@ -148,5 +148,6 @@ public class Principal {
         }
     }
 }
+
 
 
